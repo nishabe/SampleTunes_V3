@@ -35,16 +35,22 @@ class TrackCell: UITableViewCell {
     func configure(track: Track, downloaded: Bool) {
         titleLabel.text = track.name
         artistLabel.text = track.artist
-        progressView.isHidden = true
-        progressLabel.isHidden = true
         pauseButton.isHidden = true
         cancelButton.isHidden = true
+        progressView.setProgress(0.0, animated: false)
         // If the track is already downloaded, enable cell selection and hide the Download button
         selectionStyle = downloaded ? UITableViewCellSelectionStyle.gray : UITableViewCellSelectionStyle.none
         if downloaded  {
             downloadButton.isHidden = true
+            progressView.isHidden = true
         } else {
             downloadButton.isHidden = false
+            progressView.isHidden = false
         }
+    }
+    
+    func updateDisplay(progress: Float, totalSize : String) {
+        progressView.progress = progress
+        progressLabel.text = String(format: "%.1f%% of %@", progress * 100, totalSize)
     }
 }

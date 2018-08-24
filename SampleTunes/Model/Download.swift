@@ -15,4 +15,5 @@ class Download {
     }
     var task: URLSessionDownloadTask? // Download service sets these values
     var isDownloading = false
+    var progress: Float = 0
 }
