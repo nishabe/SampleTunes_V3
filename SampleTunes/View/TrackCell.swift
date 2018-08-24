@@ -10,6 +10,9 @@ import UIKit
 
 protocol TrackCellDelegate {
     func downloadTapped(_ cell: TrackCell)
+    func pauseTapped(_ cell: TrackCell)
+    func resumeTapped(_ cell: TrackCell)
+    func cancelTapped(_ cell: TrackCell)
 }
 class TrackCell: UITableViewCell {
 
@@ -23,30 +26,43 @@ class TrackCell: UITableViewCell {
     @IBOutlet weak var cancelButton: UIButton!
     @IBOutlet weak var downloadButton: UIButton!
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
+    @IBAction func pauseOrResumeTapped(_ sender: AnyObject) {
+        if(pauseButton.titleLabel!.text == "Pause") {
+            delegate?.pauseTapped(self)
+        } else {
+            delegate?.resumeTapped(self)
+        }
+    }
+    
+    @IBAction func cancelTapped(_ sender: AnyObject) {
+        delegate?.cancelTapped(self)
     }
     
     @IBAction func downloadTapped(_ sender: AnyObject) {
         delegate?.downloadTapped(self)
     }
     
-    func configure(track: Track, downloaded: Bool) {
+    func configure(track: Track, downloaded: Bool, download: Download?) {
         titleLabel.text = track.name
         artistLabel.text = track.artist
-        pauseButton.isHidden = true
-        cancelButton.isHidden = true
         progressView.setProgress(0.0, animated: false)
+        // Download controls are Pause/Resume, Cancel buttons, progress info
+        var showDownloadControls = false
+        // Non-nil Download object means a download is in progress
+        if let download = download {
+            showDownloadControls = true
+            let title = download.isDownloading ? "Pause" : "Resume"
+            pauseButton.setTitle(title, for: .normal)
+            progressLabel.text = download.isDownloading ? "Downloading..." : "Paused"
+        }
+        pauseButton.isHidden = !showDownloadControls
+        cancelButton.isHidden = !showDownloadControls
+        progressView.isHidden = !showDownloadControls
+        progressLabel.isHidden = !showDownloadControls
+        
         // If the track is already downloaded, enable cell selection and hide the Download button
         selectionStyle = downloaded ? UITableViewCellSelectionStyle.gray : UITableViewCellSelectionStyle.none
-        if downloaded  {
-            downloadButton.isHidden = true
-            progressView.isHidden = true
-        } else {
-            downloadButton.isHidden = false
-            progressView.isHidden = false
-        }
+        downloadButton.isHidden = downloaded || showDownloadControls
     }
     
     func updateDisplay(progress: Float, totalSize : String) {
